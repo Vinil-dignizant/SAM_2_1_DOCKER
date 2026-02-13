@@ -1,0 +1,43 @@
+version: "3.8"
+
+services:
+  sam2-training:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sam2-fine-tuning
+    # ---- GPU Access ----
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
+    # ---- Environment (credentials from .env) ----
+    env_file:
+      - .env
+    # ---- Volumes ----
+    volumes:
+      # Training data persists on host (downloaded on first run)
+      - ./data/train:/app/fine_tuning_SAM2/data/train
+      # Training logs & checkpoints persist on host
+      - ./sam2_logs:/app/fine_tuning_SAM2/sam2/sam2_logs
+    # ---- Ports ----
+    ports:
+      - "6006:6006"
+    # ---- Shared memory (critical for DataLoader workers) ----
+    shm_size: "8g"
+    # ---- Restart policy ----
+    restart: unless-stopped
+
+  # Optional: standalone TensorBoard service
+  tensorboard:
+    image: tensorflow/tensorflow:latest
+    container_name: sam2-tensorboard
+    command: tensorboard --bind_all --logdir /logs
+    volumes:
+      - ./sam2_logs:/logs:ro
+    ports:
+      - "6007:6006"
+    restart: unless-stopped

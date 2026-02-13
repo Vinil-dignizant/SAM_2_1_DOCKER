@@ -1,0 +1,20 @@
+# Credentials
+.env
+
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environments
+sam_env/
+venv/
+.venv/
+
+# Model weights
+*.pt
+*.pth
+*.onnx
+
+# Logs
+sam2_logs/
+data
